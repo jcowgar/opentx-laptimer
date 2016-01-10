@@ -31,8 +31,10 @@ local MID_MS_MIN = -100
 local MID_MS_MAX = 100
 local ON_MS  = 924
 
-local SCREEN_SETUP = 0
-local SCREEN_TIMER = 1
+local SCREEN_SETUP = 1
+local SCREEN_TIMER = 2
+local SCREEN_POST_RACE = 3
+local SCREEN_COUNT = SCREEN_POST_RACE
 
 --
 -- State Variables
@@ -68,7 +70,7 @@ local function round(num, decimals)
 end
 
 local function draw_screen_title(title, pageNumber)
-	lcd.drawScreenTitle('Lap Timer - ' .. title, pageNumber, 2)
+	lcd.drawScreenTitle('Lap Timer - ' .. title, pageNumber, SCREEN_COUNT)
 end
 
 -----------------------------------------------------------------------
@@ -80,7 +82,7 @@ end
 local function setup_draw()
 	lcd.clear()
 	
-	draw_screen_title('Setup', 1)
+	draw_screen_title('Setup', SCREEN_SETUP)
 	
 	lcd.drawText(2, 13, ' Lap Timer ', DBLSIZE)
 	lcd.drawText(93, 23, 'by Jeremy Cowgar', SMLSIZE)
@@ -289,6 +291,8 @@ local function timer_func(keyEvent)
 				timerReset()
 				
 				lapNumber = 0
+				
+				currentScreen = SCREEN_POST_RACE
 			else
 				timerStart()
 			end
@@ -322,6 +326,42 @@ local function timer_func(keyEvent)
 	lastModeSw = modeSwVal	
 end
 
+-----------------------------------------------------------------------
+--
+-- Post Race Portion of the program
+--
+-----------------------------------------------------------------------
+
+local function post_race_func(keyEvent)
+	lcd.clear()
+	
+	draw_screen_title('Post Race', SCREEN_POST_RACE)
+	
+	lcd.drawText(2, 13, 'Save Race?', DBLSIZE)
+	lcd.drawText(20, 35, 'Enter to save, Exit to discard')
+	
+	if keyEvent == EVT_ENTER_BREAK then
+		lapsSave()
+		
+		playFile('on.wav')
+		
+		currentScreen = SCREEN_TIMER
+		
+	elseif keyEvent == EVT_EXIT_BREAK then
+		lapsReset()
+		
+		playFile('reset.wav')
+		
+		currentScreen = SCREEN_TIMER
+	end
+end
+
+-----------------------------------------------------------------------
+--
+-- OpenTx Entry Points
+--
+-----------------------------------------------------------------------
+
 local function init_func()
 	lcd.clear()
 end
@@ -331,6 +371,8 @@ local function run_func(keyEvent)
 		setup_func(keyEvent)
 	elseif currentScreen == SCREEN_TIMER then
 		timer_func(keyEvent)
+	elseif currentScreen == SCREEN_POST_RACE then
+		post_race_func(keyEvent)
 	end
 end
 
