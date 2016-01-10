@@ -11,14 +11,8 @@ becomes active.
 Controls
 --------
 
-Lap Timer needs a 3 position switch and preferably a momentary 2 position
-switch. The momentary 2 position switch will be toggled to indicate a lap
-completion.
-
-The 3 position switch will change modes for the timer:
-  *   UP = Save Race
-  *  MID = Timer Ready
-  * DOWN = Reset Race
+Lap Timer only needs one control, preferably a momentary 2 position
+switch to record a lap.
 
 When saving a race, all associated laps will be written to a CSV file on
 the SD card in the following layout:
