@@ -5,6 +5,9 @@ The goal is to have an advanced lap timer on your OpenTX compatible radio
 using as little controls as possible. It should be able to store race and
 lap data for analysis back at the computer.
 
+The timer automatically starts when in the Ready Mode and the throttle
+becomes active.
+
 Controls
 --------
 

@@ -8,6 +8,7 @@
 -- User Configuration
 --
 
+local THROTTLE_CHANNEL = 'ch1'
 local MODE_SWITCH = 'sg'
 local LAP_SWITCH = 'sh'
 local SHOW_SPLIT = true
@@ -204,6 +205,20 @@ local function run_func(keyEvent)
 		
 		local lapSwVal = getValue(LAP_SWITCH)
 		local lapSwChanged = (lastLapSw ~= lapSwVal)
+		
+		--
+		-- Trick our system into thinking it should start the
+		-- timer if our throttle goes high
+		--
+		
+		if isTiming == false and getValue(THROTTLE_CHANNEL) >= OFF_MS then
+			lapSwChanged = true
+			lapSwVal = ON_MS
+		end
+		
+		--
+		-- Start a new lap
+		--
 		
 		if lapSwChanged and lapSwVal >= ON_MS then
 			if isTiming then
