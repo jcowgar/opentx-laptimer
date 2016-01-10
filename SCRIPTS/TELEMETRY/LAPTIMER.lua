@@ -183,6 +183,9 @@ local function lapsShow()
 	
 	if isTiming then
 		lcd.drawText(90, 40, lapNumber .. ' of ' .. lapCount, DBLSIZE)
+	else
+		lcd.drawText(55, 15, 'Waiting for', DBLSIZE)
+		lcd.drawText(55, 35, 'Race Start', DBLSIZE)
 	end
 
 	if lc == 0 then
