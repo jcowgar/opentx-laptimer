@@ -214,7 +214,7 @@ local function lapsShow()
 	
 	lcd.drawText(5, 23, string.format('%0.2f', round(avg / 100.0, 2)) .. ' avg', DBLSIZE)
 	
-	if lc > 1 then
+	if isTiming and lc > 1 then
 		if SPEAK_GOOD_BAD and spokeGoodBad == false then
 			spokeGoodBad = true
 			
@@ -313,10 +313,10 @@ local function timer_func(keyEvent)
 
 	if isTiming then
 		timerDraw()
-		
-		if lapCount > 0 then
-			lapsShow()
-		end
+	end
+
+	if #laps > 0 then
+		lapsShow()
 	end
 
 	lastModeSw = modeSwVal	
