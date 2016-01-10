@@ -31,9 +31,20 @@ local MID_MS_MIN = -100
 local MID_MS_MAX = 100
 local ON_MS  = 924
 
+local SCREEN_SETUP = 0
+local SCREEN_TIMER = 1
+
 --
 -- State Variables
 --
+
+local currentScreen = SCREEN_SETUP
+
+-- Setup Related
+
+local lapCount = 3
+
+-- Timer Related
 
 local isTiming = false
 local lastModeSw = -2048
@@ -41,7 +52,7 @@ local lastLapSw = -2048
 local spokeGoodBad = false
 
 local laps = {}
-local lapCount = 0
+local lapNumber = 0
 local lapStartDateTime = {}
 local lapStartTicks = 0
 local lapThrottles = {}
@@ -51,10 +62,55 @@ local lapSpokeMid = false
 -- Helper Methods
 --
 
-function round(num, decimals)
+local function round(num, decimals)
   local mult = 10^(decimals or 0)
   return math.floor(num * mult + 0.5) / mult
 end
+
+local function draw_screen_title(title, pageNumber)
+	lcd.drawScreenTitle('Lap Timer - ' .. title, pageNumber, 2)
+end
+
+-----------------------------------------------------------------------
+--
+-- Setup Portion of the program
+--
+-----------------------------------------------------------------------
+
+local function setup_draw()
+	lcd.clear()
+	
+	draw_screen_title('Setup', 1)
+	
+	lcd.drawText(2, 13, ' Lap Timer ', DBLSIZE)
+	lcd.drawText(93, 23, 'by Jeremy Cowgar', SMLSIZE)
+	lcd.drawText(5, 40, 'Race Name:')
+	lcd.drawText(63, 40, ' ' .. 'Not Yet Implemented' .. ' ')
+	lcd.drawText(6, 52, 'Lap Count:')
+	lcd.drawText(63, 52, ' ' .. lapCount .. ' ', INVERS)
+end
+
+local function setup_func(keyEvent)
+	if keyEvent == EVT_PLUS_FIRST or keyEvent == EVT_PLUS_RPT then
+		lapCount = lapCount + 1
+	elseif keyEvent == EVT_MINUS_FIRST or keyEvent == EVT_MINUS_RPT then
+		lapCount = lapCount - 1
+	elseif keyEvent == EVT_ENTER_BREAK then
+		currentScreen = SCREEN_TIMER
+	end
+	
+	if lapCount < 1 then
+		lapCount = 1
+	end
+	
+	setup_draw()
+end
+
+-----------------------------------------------------------------------
+--
+-- Timer Portion of the program
+--
+-----------------------------------------------------------------------
 
 local function timerReset()
 	isTiming = false
@@ -96,7 +152,7 @@ end
 
 local function lapsReset()
 	laps = {}
-	lapCount = 0
+	lapNumber = 0
 
 	statusDraw('Resetting')		
 	timerReset()
@@ -156,7 +212,7 @@ local function lapsShow()
 	
 	local avg = sum / lc
 	
-	lcd.drawText(5, 23, string.format('%0.2f', round(avg / 100.0, 2)), DBLSIZE)
+	lcd.drawText(5, 23, string.format('%0.2f', round(avg / 100.0, 2)) .. ' avg', DBLSIZE)
 	
 	if lc > 1 then
 		if SPEAK_GOOD_BAD and spokeGoodBad == false then
@@ -181,11 +237,7 @@ local function lapsShow()
 	end
 end
 
-local function init_func()
-	lcd.clear()
-end
-
-local function run_func(keyEvent)
+local function timer_func(keyEvent)
 	local modeSwVal = getValue(MODE_SWITCH)
 	local modeChanged = (lastModeSw ~= modeSwVal)
 	
@@ -228,11 +280,18 @@ local function run_func(keyEvent)
 				
 				local lapTicks = (getTime() - lapStartTicks)
 								
-				laps[lapCount] = { lapStartDateTime, lapTicks }
+				laps[lapNumber] = { lapStartDateTime, lapTicks }
 			end
 			
-			lapCount = lapCount + 1
-			timerStart()
+			lapNumber = lapNumber + 1
+			
+			if lapNumber > lapCount then
+				timerReset()
+				
+				lapNumber = 0
+			else
+				timerStart()
+			end
 		end
 		
 		if isTiming then
@@ -261,6 +320,18 @@ local function run_func(keyEvent)
 	end
 
 	lastModeSw = modeSwVal	
+end
+
+local function init_func()
+	lcd.clear()
+end
+
+local function run_func(keyEvent)
+	if currentScreen == SCREEN_SETUP then
+		setup_func(keyEvent)
+	elseif currentScreen == SCREEN_TIMER then
+		timer_func(keyEvent)
+	end
 end
 
 return { init=init_func, run=run_func }
