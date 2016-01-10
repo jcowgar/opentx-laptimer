@@ -238,6 +238,16 @@ local function lapsShow()
 end
 
 local function timer_func(keyEvent)
+	if keyEvent == EVT_EXIT_BREAK then
+		lapsReset()
+
+	elseif keyEvent == EVT_MENU_BREAK then
+		lapsReset()		
+		currentScreen = SCREEN_SETUP
+
+		return
+	end
+
 	lcd.clear()
 
 	--
