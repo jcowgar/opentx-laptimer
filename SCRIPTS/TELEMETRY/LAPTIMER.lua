@@ -1,14 +1,7 @@
 --
 -- Lap Timer by Jeremy Cowgar <jeremy@cowgar.com>
 --
--- Modes:
---   *   UP = Save Laps
---   *  MID = Timer Ready
---   * DOWN = Reset Current Lap
---
--- When saving laps, they will be written to a CSV file on the SD card
--- in the following layout:
---   * Lap Start Timestamp,Lap Number,Lap Time,Avg Throttle
+-- https://github.com/jcowgar/opentx-laptimer
 --
 
 --
