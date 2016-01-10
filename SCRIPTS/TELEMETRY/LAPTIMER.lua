@@ -146,21 +146,14 @@ local function timerDraw()
 	end
 end
 
-local function statusDraw(msg)
-	lcd.drawText(5, 53, msg .. '...')
-end
-
 local function lapsReset()
 	laps = {}
 	lapNumber = 0
 
-	statusDraw('Resetting')		
 	timerReset()
 end
 
 local function lapsSave()
-	statusDraw('Saving')
-	
 	local f = io.open('/laps.csv', 'a')
 	for i = 1, #laps do
 		local lap = laps[i]
@@ -289,21 +282,13 @@ local function timer_func(keyEvent)
 		end
 	end
 	
-	if isTiming then
-		statusDraw('Active')
-	else
-		statusDraw('Ready')
-	end
-
 	lastLapSw = lapSwVal
 
 	if isTiming then
 		timerDraw()
 	end
 
-	if #laps > 0 then
-		lapsShow()
-	end
+	lapsShow()
 end
 
 -----------------------------------------------------------------------
