@@ -9,7 +9,6 @@
 --
 
 local THROTTLE_CHANNEL = 'ch1'
-local MODE_SWITCH = 'sg'
 local LAP_SWITCH = 'sh'
 local SHOW_SPLIT = true
 local SHOW_SPLIT_AVG = false
@@ -49,7 +48,6 @@ local lapCount = 3
 -- Timer Related
 
 local isTiming = false
-local lastModeSw = -2048
 local lastLapSw = -2048
 local spokeGoodBad = false
 
@@ -240,80 +238,60 @@ local function lapsShow()
 end
 
 local function timer_func(keyEvent)
-	local modeSwVal = getValue(MODE_SWITCH)
-	local modeChanged = (lastModeSw ~= modeSwVal)
-	
 	lcd.clear()
-	
-	if modeChanged and modeSwVal <= OFF_MS then
-		--
-		-- Reset the current race
-		--
 
-		lapsReset()
-		
-	elseif modeSwVal >= MID_MS_MIN and modeSwVal <= MID_MS_MAX then
-		--
-		-- Check to see if we should do anything with the lap switch
-		--
-		
-		local lapSwVal = getValue(LAP_SWITCH)
-		local lapSwChanged = (lastLapSw ~= lapSwVal)
-		
-		--
-		-- Trick our system into thinking it should start the
-		-- timer if our throttle goes high
-		--
-		
-		if isTiming == false and getValue(THROTTLE_CHANNEL) >= OFF_MS then
-			lapSwChanged = true
-			lapSwVal = ON_MS
-		end
-		
-		--
-		-- Start a new lap
-		--
-		
-		if lapSwChanged and lapSwVal >= ON_MS then
-			if isTiming then
-				--
-				-- We already have a lap going, save the timer data
-				--
-				
-				local lapTicks = (getTime() - lapStartTicks)
-								
-				laps[lapNumber] = { lapStartDateTime, lapTicks }
-			end
-			
-			lapNumber = lapNumber + 1
-			
-			if lapNumber > lapCount then
-				timerReset()
-				
-				lapNumber = 0
-				
-				currentScreen = SCREEN_POST_RACE
-			else
-				timerStart()
-			end
-		end
-		
-		if isTiming then
-			statusDraw('Active')
-		else
-			statusDraw('Ready')
-		end
-
-		lastLapSw = lapSwVal
+	--
+	-- Check to see if we should do anything with the lap switch
+	--
 	
-	elseif modeChanged and modeSwVal >= ON_MS then
-		--
-		-- Save the current race
-		--
-		
-		lapsSave()
-		timerReset()
+	local lapSwVal = getValue(LAP_SWITCH)
+	local lapSwChanged = (lastLapSw ~= lapSwVal)
+	
+	--
+	-- Trick our system into thinking it should start the
+	-- timer if our throttle goes high
+	--
+	
+	if isTiming == false and getValue(THROTTLE_CHANNEL) >= OFF_MS then
+		lapSwChanged = true
+		lapSwVal = ON_MS
 	end
+	
+	--
+	-- Start a new lap
+	--
+	
+	if lapSwChanged and lapSwVal >= ON_MS then
+		if isTiming then
+			--
+			-- We already have a lap going, save the timer data
+			--
+			
+			local lapTicks = (getTime() - lapStartTicks)
+							
+			laps[lapNumber] = { lapStartDateTime, lapTicks }
+		end
+		
+		lapNumber = lapNumber + 1
+		
+		if lapNumber > lapCount then
+			timerReset()
+			
+			lapNumber = 0
+			
+			currentScreen = SCREEN_POST_RACE
+		else
+			timerStart()
+		end
+	end
+	
+	if isTiming then
+		statusDraw('Active')
+	else
+		statusDraw('Ready')
+	end
+
+	lastLapSw = lapSwVal
 
 	if isTiming then
 		timerDraw()
@@ -322,8 +300,6 @@ local function timer_func(keyEvent)
 	if #laps > 0 then
 		lapsShow()
 	end
-
-	lastModeSw = modeSwVal	
 end
 
 -----------------------------------------------------------------------
