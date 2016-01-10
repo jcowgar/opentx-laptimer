@@ -188,6 +188,10 @@ local function lapsShow()
 	local lastLapTime = 0
 	local thisLapTime = 0
 	
+	if isTiming then
+		lcd.drawText(90, 40, lapNumber .. ' of ' .. lapCount, DBLSIZE)
+	end
+
 	if lc == 0 then
 		return
 	elseif lc > 1 then
