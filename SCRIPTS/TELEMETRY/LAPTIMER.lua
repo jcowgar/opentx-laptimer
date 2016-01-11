@@ -113,7 +113,7 @@ end
 local function setup_draw()
 	lcd.clear()
 	
-	lcd.drawScreenTitle('Lap Timer - Setup', 1, 2)
+	lcd.drawScreenTitle('Lap Timer - Setup', 1, 1)
 	
 	lcd.drawText(2, 13, ' Lap Timer ', DBLSIZE)
 	lcd.drawText(93, 23, 'by Jeremy Cowgar', SMLSIZE)
