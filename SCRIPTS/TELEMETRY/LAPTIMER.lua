@@ -351,7 +351,7 @@ local function post_race_func(keyEvent)
 	
 	lcd.drawText(2, 2, 'Post Race Stats', MIDSIZE)
 	lcd.drawText(2, 55, 'Discard')
-	lcd.drawText(185, 55, 'Save')
+	lcd.drawText(187, 55, 'Save')
 	
 	laps_show(170, 3, 6)
 	
