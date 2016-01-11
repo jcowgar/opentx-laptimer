@@ -134,6 +134,10 @@ local function setup_func(keyEvent)
 		lapCount = lapCount - 1
 	elseif keyEvent == EVT_ENTER_BREAK then
 		currentScreen = SCREEN_TIMER
+		
+		setup_did_initial_draw = false
+		
+		return
 	end
 	
 	if lapCount < 1 then
