@@ -13,6 +13,10 @@ local LAP_SWITCH = 'sh'
 local SPEAK_GOOD_BAD = true
 local SPEAK_MID = true
 local SPEAK_LAP_NUMBER = true
+local SOUND_GOOD_LAP = 'good.wav'
+local SOUND_BAD_LAP = 'bad.wav'
+local SOUND_RACE_SAVE = 'on.wav'
+local SOUND_RACE_DISCARD = 'reset.wav'
 
 --
 -- User Configuration Done
@@ -230,9 +234,9 @@ local function lapsSpeakProgress()
 			spokeGoodBad = true
 
 			if thisLapTime < lastLapTime then
-				playFile("good.wav")
+				playFile(SOUND_GOOD_LAP)
 			else
-				playFile("bad.wav")
+				playFile(SOUND_BAD_LAP)
 			end
 		end
 	end
@@ -412,13 +416,13 @@ local function post_race_func(keyEvent)
 		if post_race_option == PR_SAVE then
 			lapsSave()
 		
-			playFile('on.wav')
+			playFile(SOUND_RACE_SAVE)
 		
 			currentScreen = SCREEN_TIMER
 		elseif post_race_option == PR_DISCARD then
 			lapsReset()
 		
-			playFile('reset.wav')
+			playFile(SOUND_RACE_DISCARD)
 		
 			currentScreen = SCREEN_TIMER
 		end
