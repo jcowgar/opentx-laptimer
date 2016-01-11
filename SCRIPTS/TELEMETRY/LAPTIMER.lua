@@ -199,7 +199,7 @@ local function lapsSave()
 			string.format('%02d', dt.hour), ':',
 			string.format('%02d', dt.min), ':',
 			string.format('%02d', dt.sec), ',',
-			i, ',',
+			i, ',', lapCount, ',',
 			lap[2] / 100.0, ',',
 			0, -- Average throttle not yet tracked
 			"\r\n")
