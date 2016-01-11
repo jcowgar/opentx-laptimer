@@ -272,7 +272,8 @@ end
 
 local function timer_func(keyEvent)
 	if keyEvent == EVT_EXIT_BREAK then
-		lapsReset()
+		currentScreen = SCREEN_POST_RACE
+		return
 
 	elseif keyEvent == EVT_MENU_BREAK then
 		lapsReset()		
