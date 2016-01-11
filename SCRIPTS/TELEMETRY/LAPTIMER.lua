@@ -287,25 +287,30 @@ local function timer_func(keyEvent)
 	end
 
 	lcd.clear()
+	
+	if isTiming then
+		-- Column 1
+		lcd.drawFilledRectangle(0, 22, 70, 11, BLACK)	
+		lcd.drawText(30, 24, 'Cur', INVERS)
 
-	-- Column 1
-	lcd.drawFilledRectangle(0, 22, 70, 11, BLACK)	
-	lcd.drawText(30, 24, 'Cur', INVERS)
+		lcd.drawFilledRectangle(0, 53, 70, 11, BLACK)	
+		lcd.drawText(30, 55, 'Avg', INVERS)
+	
+		-- Column 2
+	
+		lcd.drawFilledRectangle(70, 22, 70, 11, BLACK)
+		lcd.drawText(90, 24, 'Split', INVERS)
+	
+		lcd.drawFilledRectangle(70, 53, 70, 11, BLACK)
+		lcd.drawText(100, 55, 'Lap', INVERS)
+	
+		lcd.drawLine(70, 0, 70, 63, SOLID, FORCE)
+		lcd.drawLine(140, 0, 140, 63, SOLID, FORCE)
 
-	lcd.drawFilledRectangle(0, 53, 70, 11, BLACK)	
-	lcd.drawText(30, 55, 'Avg', INVERS)
+		-- Outline
+		lcd.drawRectangle(0, 0, 212, 64, SOLID)
+	end
 	
-	-- Column 2
-	
-	lcd.drawFilledRectangle(70, 22, 70, 11, BLACK)
-	lcd.drawText(90, 24, 'Split', INVERS)
-	
-	lcd.drawFilledRectangle(70, 53, 70, 11, BLACK)
-	lcd.drawText(100, 55, 'Lap', INVERS)
-	
-	lcd.drawLine(70, 0, 70, 63, SOLID, FORCE)
-	lcd.drawLine(140, 0, 140, 63, SOLID, FORCE)
-
 	--
 	-- Check to see if we should do anything with the lap switch
 	--
