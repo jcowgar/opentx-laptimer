@@ -246,7 +246,7 @@ local function lapsShow()
 		
 		lcd.drawText(150, ((lc - i) * 10) + 3,
 			string.format('%d', i) .. ': ' ..
-			string.format('%0.2f', lap[2] / 100.0) .. '/' .. '0')
+			string.format('%0.2f', lap[2] / 100.0))
 	end
 
 	local sum = 0
