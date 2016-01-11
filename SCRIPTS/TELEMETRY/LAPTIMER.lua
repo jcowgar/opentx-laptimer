@@ -110,15 +110,21 @@ end
 --
 -----------------------------------------------------------------------
 
+local setup_did_initial_draw = false
+
 local function setup_draw()
-	lcd.clear()
+	if setup_did_initial_draw == false then
+		setup_did_initial_draw = true
+		lcd.clear()
 	
-	lcd.drawScreenTitle('Lap Timer - Setup', 1, 1)
+		lcd.drawScreenTitle('Configuration', 1, 1)
 	
-	lcd.drawText(2, 13, ' Lap Timer ', DBLSIZE)
-	lcd.drawText(93, 23, 'by Jeremy Cowgar', SMLSIZE)
+		lcd.drawPixmap(135, 11, '/BMP/LAPTIME/S_SWHAND.bmp')
+		lcd.drawPixmap(2, 9, '/BMP/LAPTIME/S_TITLE.bmp')
+	end
+	
 	lcd.drawText(5, 40, 'Race Name:')
-	lcd.drawText(63, 40, ' ' .. 'Not Yet Implemented' .. ' ')
+	lcd.drawText(63, 40, ' ' .. 'N/A' .. ' ')
 	lcd.drawText(6, 52, 'Lap Count:')
 	lcd.drawText(63, 52, ' ' .. lapCount .. ' ', INVERS)
 end
