@@ -361,14 +361,38 @@ end
 --
 -----------------------------------------------------------------------
 
+local PR_SAVE = 1
+local PR_DISCARD = 2
+
+local post_race_option = PR_SAVE
+
 local function post_race_func(keyEvent)
 	local stats = laps_compute_stats()
+
+	if keyEvent == EVT_MINUS_FIRST or keyEvent == EVT_MINUS_RPT or
+	   keyEvent == EVT_PLUS_FIRST or keyEvent == EVT_PLUS_RPT
+	then
+		if post_race_option == PR_SAVE then
+			post_race_option = PR_DISCARD
+		elseif post_race_option == PR_DISCARD then
+			post_race_option = PR_SAVE
+		end
+	end
+
+	local saveFlag = 0
+	local discardFlag = 0
+	
+	if post_race_option == PR_SAVE then
+		saveFlag = INVERS
+	elseif post_race_option == PR_DISCARD then
+		discardFlag = INVERS
+	end
 
 	lcd.clear()
 	
 	lcd.drawText(2, 2, 'Post Race Stats', MIDSIZE)
-	lcd.drawText(2, 55, 'Discard')
-	lcd.drawText(187, 55, 'Save')
+	lcd.drawText(2, 55, ' Save ', saveFlag)
+	lcd.drawText(35, 55, ' Discard ', discardFlag)
 	
 	laps_show(170, 3, 6)
 	
@@ -377,18 +401,19 @@ local function post_race_func(keyEvent)
 	lcd.drawText(12, 39, 'Total Time ' .. string.format('%0.2f', stats.totalTime / 100.0) .. ' seconds')
 	
 	if keyEvent == EVT_ENTER_BREAK then
-		lapsSave()
+		if post_race_option == PR_SAVE then
+			lapsSave()
 		
-		playFile('on.wav')
+			playFile('on.wav')
 		
-		currentScreen = SCREEN_TIMER
+			currentScreen = SCREEN_TIMER
+		elseif post_race_option == PR_DISCARD then
+			lapsReset()
 		
-	elseif keyEvent == EVT_EXIT_BREAK then
-		lapsReset()
+			playFile('reset.wav')
 		
-		playFile('reset.wav')
-		
-		currentScreen = SCREEN_TIMER
+			currentScreen = SCREEN_TIMER
+		end
 	end
 end
 
