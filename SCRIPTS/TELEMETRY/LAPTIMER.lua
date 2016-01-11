@@ -60,11 +60,6 @@ local lapSpokeMid = false
 -- Helper Methods
 --
 
-local function round(num, decimals)
-  local mult = 10^(decimals or 0)
-  return math.floor(num * mult + 0.5) / mult
-end
-
 local function laps_compute_stats()
 	local stats = {}
 	local lc = #laps
