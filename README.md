@@ -5,6 +5,8 @@ The goal is to have an advanced lap timer on your OpenTX compatible radio
 using as little controls as possible. It should be able to store race and
 lap data for analysis back at the computer.
 
+See https://www.youtube.com/watch?v=ZyI2gwdLWe0 for a quick demo of the Lap Timer.
+
 Installation
 ------------
 
