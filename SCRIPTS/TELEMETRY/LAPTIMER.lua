@@ -357,6 +357,7 @@ local function post_race_func(keyEvent)
 	
 	lcd.drawText(12, 18, 'Finished ' .. stats.lapCount .. ' of ' .. stats.raceLapCount .. ' laps')
 	lcd.drawText(12, 28, 'Average Lap ' .. string.format('%0.2f', stats.averageLap / 100.0) .. ' seconds')
+	lcd.drawText(12, 39, 'Total Time ' .. string.format('%0.2f', stats.totalTime / 100.0) .. ' seconds')
 	
 	if keyEvent == EVT_ENTER_BREAK then
 		lapsSave()
