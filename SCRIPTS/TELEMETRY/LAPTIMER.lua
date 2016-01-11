@@ -299,7 +299,7 @@ local function timer_func(keyEvent)
 		-- Column 2
 	
 		lcd.drawFilledRectangle(70, 22, 70, 11, BLACK)
-		lcd.drawText(90, 25, 'Diff', INVERS)
+		lcd.drawText(98, 25, 'Diff', INVERS)
 	
 		lcd.drawFilledRectangle(70, 53, 70, 11, BLACK)
 		lcd.drawText(100, 55, 'Lap', INVERS)
