@@ -218,63 +218,32 @@ local function lapsSave()
 	lapsReset()
 end
 
-local function lapsShow()
-	local lc = #laps
-	local lastLapTime = 0
-	local thisLapTime = 0
-	
-	if isTiming then
-		lcd.drawNumber(98, 35, lapNumber, DBLSIZE)
-		lcd.drawNumber(135, 35, lapCount, DBLSIZE)
-		lcd.drawText(102, 42, 'of')
-	else
-		lcd.drawText(55, 15, 'Waiting for', DBLSIZE)
-		lcd.drawText(55, 35, 'Race Start', DBLSIZE)
+local function lapsSpeakProgress()
+	if #laps > 0 then
+		if SPEAK_LAP_NUMBER then
+			playNumber(lapNumber, 0)
+		end
 	end
+	
+	if #laps > 1 then
+		local lastLapTime = laps[#laps - 1][2]
+		local thisLapTime = laps[#laps][2]
 
-	if lc == 0 then
-		return
-	elseif lc > 1 then
-		lastLapTime = laps[lc - 1][2]
-		thisLapTime = laps[lc][2]
-	end
-	
-	local lcEnd = math.max(lc - 5, 1)
-	
-	for i = lc, lcEnd, -1 do
-		local lap = laps[i]
-		
-		lcd.drawText(150, ((lc - i) * 10) + 3,
-			string.format('%d', i) .. ': ' ..
-			string.format('%0.2f', lap[2] / 100.0))
-	end
-
-	local sum = 0
-	for i = 1, lc do
-		sum = sum + laps[i][2]
-	end
-	
-	local avg = sum / lc
-	
-	lcd.drawNumber(65, 35, avg, PREC2 + DBLSIZE)
-	
-	if isTiming and lc > 1 then
 		if SPEAK_GOOD_BAD and spokeGoodBad == false then
 			spokeGoodBad = true
-			
+
 			if thisLapTime < lastLapTime then
 				playFile("good.wav")
 			else
 				playFile("bad.wav")
 			end
 		end
-		
-		local splitLast = thisLapTime - lastLapTime
-		lcd.drawNumber(135, 3, splitLast, PREC2 + DBLSIZE)
 	end
 end
 
 local function timer_func(keyEvent)
+	local showTiming = isTiming
+
 	if keyEvent == EVT_EXIT_BREAK then
 		currentScreen = SCREEN_POST_RACE
 		return
@@ -289,16 +258,38 @@ local function timer_func(keyEvent)
 	lcd.clear()
 	
 	if isTiming then
+		-- Average
+		local avg = 0.0
+		local diff = 0.0
+		
+		if #laps > 0 then
+			local sum = 0
+			for i = 1, #laps do
+				sum = sum + laps[i][2]
+			end
+	
+			avg = sum / #laps
+		end
+		
+		if #laps > 1 then
+			local lastLapTime = laps[#laps - 1][2]
+			local thisLapTime = laps[#laps][2]
+
+			diff = thisLapTime - lastLapTime
+		end
+
 		-- Column 1
 		lcd.drawFilledRectangle(0, 22, 70, 11, BLACK)	
 		lcd.drawText(30, 24, 'Cur', INVERS)
 
 		lcd.drawFilledRectangle(0, 53, 70, 11, BLACK)	
+		lcd.drawNumber(65, 35, avg, PREC2 + DBLSIZE)
 		lcd.drawText(30, 55, 'Avg', INVERS)
 	
 		-- Column 2
 	
 		lcd.drawFilledRectangle(70, 22, 70, 11, BLACK)
+		lcd.drawNumber(135, 3, diff, PREC2 + DBLSIZE)
 		lcd.drawText(98, 25, 'Diff', INVERS)
 	
 		lcd.drawFilledRectangle(70, 53, 70, 11, BLACK)
@@ -309,8 +300,17 @@ local function timer_func(keyEvent)
 
 		-- Outline
 		lcd.drawRectangle(0, 0, 212, 64, SOLID)
-	end
+
+		lcd.drawNumber(98, 35, lapNumber, DBLSIZE)
+		lcd.drawNumber(135, 35, lapCount, DBLSIZE)
+		lcd.drawText(102, 42, 'of')
 	
+	else
+		lcd.drawText(55, 15, 'Waiting for', DBLSIZE)
+		lcd.drawText(55, 35, 'Race Start', DBLSIZE)
+	end
+
+
 	--
 	-- Check to see if we should do anything with the lap switch
 	--
@@ -341,11 +341,9 @@ local function timer_func(keyEvent)
 			local lapTicks = (getTime() - lapStartTicks)
 							
 			laps[lapNumber] = { lapStartDateTime, lapTicks }
-
-			if SPEAK_LAP_NUMBER then
-				playNumber(lapNumber, 0)
-			end		
 		end
+		
+		lapsSpeakProgress()
 		
 		lapNumber = lapNumber + 1
 		
@@ -362,11 +360,10 @@ local function timer_func(keyEvent)
 	
 	lastLapSw = lapSwVal
 
-	if isTiming then
+	if showTiming then
 		timerDraw()
+		laps_show(170, 3, 6)
 	end
-
-	lapsShow()
 end
 
 -----------------------------------------------------------------------
