@@ -114,18 +114,20 @@ local setup_did_initial_draw = false
 local function setup_draw()
 	if setup_did_initial_draw == false then
 		setup_did_initial_draw = true
+		
 		lcd.clear()
 	
 		lcd.drawScreenTitle('Configuration', 1, 1)
 	
 		lcd.drawPixmap(135, 11, '/BMP/LAPTIME/S_SWHAND.bmp')
-		lcd.drawPixmap(2, 9, '/BMP/LAPTIME/S_TITLE.bmp')
+		lcd.drawPixmap(2, 14, '/BMP/LAPTIME/S_TITLE.bmp')
 	end
 	
-	lcd.drawText(5, 40, 'Race Name:')
-	lcd.drawText(63, 40, ' ' .. 'N/A' .. ' ')
-	lcd.drawText(6, 52, 'Lap Count:')
-	lcd.drawText(63, 52, ' ' .. lapCount .. ' ', INVERS)
+	-- Clear the lap counter (if you go from 10 down to 9, for example, it displays as 90
+	lcd.drawText(63, 47, '     ', MIDSIZE)
+
+	lcd.drawText(6, 48, 'Lap Count:')
+	lcd.drawText(63, 48, ' ' .. lapCount .. ' ', INVERS)
 end
 
 local function setup_func(keyEvent)
