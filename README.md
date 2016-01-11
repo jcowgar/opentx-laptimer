@@ -45,7 +45,7 @@ local SPEAK_LAP_NUMBER = true
   exactly. If `SPEAK_MID` is true, at 30 seconds you will hear a long beep. If you are
   further than 1/2 way around the course, then you are doing better than you did last lap.
   If, however, you are not yet to the half way point, you are doing worse than you did
-  las lap.
+  last lap.
 * **SPEAK_LAP_NUMBER** - When `true`, when a lap is completed, that number will be spoken.
 
 Usage
