@@ -19,5 +19,6 @@ the SD card in the following layout:
 
   1. Start Time (YYYY-MM-DD HH:MM:SS)
   2. Lap Number
+  3. Lap Count (total laps for race)
   3. Time (in milliseconds, divide by 1,000 to get seconds)
   4. Average Throttle

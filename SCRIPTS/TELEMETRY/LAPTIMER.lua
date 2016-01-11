@@ -33,7 +33,6 @@ local ON_MS  = 924
 local SCREEN_SETUP = 1
 local SCREEN_TIMER = 2
 local SCREEN_POST_RACE = 3
-local SCREEN_COUNT = SCREEN_POST_RACE
 
 --
 -- State Variables
@@ -67,8 +66,42 @@ local function round(num, decimals)
   return math.floor(num * mult + 0.5) / mult
 end
 
-local function draw_screen_title(title, pageNumber)
-	lcd.drawScreenTitle('Lap Timer - ' .. title, pageNumber, SCREEN_COUNT)
+local function laps_compute_stats()
+	local stats = {}
+	local lc = #laps
+	
+	stats.raceLapCount = lapCount
+	stats.lapCount = lc
+	stats.averageLap = 0.0
+	stats.totalTime = 0.0
+	
+	for i = 1, lc do
+		stats.totalTime = stats.totalTime + laps[i][2]
+	end
+	
+	stats.averageLap = stats.totalTime / stats.lapCount
+	
+	return stats
+end
+
+local function laps_show(x, y, max)
+	local lc = #laps
+	local lastLapTime = 0
+	local thisLapTime = 0
+	
+	if lc == 0 then
+		return
+	end
+	
+	local lcEnd = math.max(lc - max - 1, 1)
+	
+	for i = lc, lcEnd, -1 do
+		local lap = laps[i]
+		
+		lcd.drawText(x, ((lc - i) * 10) + y,
+			string.format('%d', i) .. ': ' ..
+			string.format('%0.2f', lap[2] / 100.0))
+	end
 end
 
 -----------------------------------------------------------------------
@@ -80,7 +113,7 @@ end
 local function setup_draw()
 	lcd.clear()
 	
-	draw_screen_title('Setup', SCREEN_SETUP)
+	lcd.drawScreenTitle('Lap Timer - Setup', 1, 2)
 	
 	lcd.drawText(2, 13, ' Lap Timer ', DBLSIZE)
 	lcd.drawText(93, 23, 'by Jeremy Cowgar', SMLSIZE)
@@ -166,7 +199,7 @@ local function lapsSave()
 			string.format('%02d', dt.hour), ':',
 			string.format('%02d', dt.min), ':',
 			string.format('%02d', dt.sec), ',',
-			i, ',',
+			i, ',', lapCount, ',',
 			lap[2] / 100.0, ',',
 			0, -- Average throttle not yet tracked
 			"\r\n")
@@ -239,7 +272,8 @@ end
 
 local function timer_func(keyEvent)
 	if keyEvent == EVT_EXIT_BREAK then
-		lapsReset()
+		currentScreen = SCREEN_POST_RACE
+		return
 
 	elseif keyEvent == EVT_MENU_BREAK then
 		lapsReset()		
@@ -311,12 +345,19 @@ end
 -----------------------------------------------------------------------
 
 local function post_race_func(keyEvent)
+	local stats = laps_compute_stats()
+
 	lcd.clear()
 	
-	draw_screen_title('Post Race', SCREEN_POST_RACE)
+	lcd.drawText(2, 2, 'Post Race Stats', MIDSIZE)
+	lcd.drawText(2, 55, 'Discard')
+	lcd.drawText(185, 55, 'Save')
 	
-	lcd.drawText(2, 13, 'Save Race?', DBLSIZE)
-	lcd.drawText(20, 35, 'Enter to save, Exit to discard')
+	laps_show(170, 3, 6)
+	
+	lcd.drawText(12, 18, 'Finished ' .. stats.lapCount .. ' of ' .. stats.raceLapCount .. ' laps')
+	lcd.drawText(12, 28, 'Average Lap ' .. string.format('%0.2f', stats.averageLap / 100.0) .. ' seconds')
+	lcd.drawText(12, 39, 'Total Time ' .. string.format('%0.2f', stats.totalTime / 100.0) .. ' seconds')
 	
 	if keyEvent == EVT_ENTER_BREAK then
 		lapsSave()
