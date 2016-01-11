@@ -283,8 +283,7 @@ local function timer_func(keyEvent)
 		lcd.drawNumber(65, 35, avg, PREC2 + DBLSIZE)
 		lcd.drawText(30, 55, 'Avg', INVERS)
 	
-		-- Column 2
-	
+		-- Column 2	
 		lcd.drawFilledRectangle(70, 22, 70, 11, BLACK)
 		lcd.drawNumber(135, 3, diff, PREC2 + DBLSIZE)
 		lcd.drawText(98, 25, 'Diff', INVERS)
@@ -295,12 +294,12 @@ local function timer_func(keyEvent)
 		lcd.drawLine(70, 0, 70, 63, SOLID, FORCE)
 		lcd.drawLine(140, 0, 140, 63, SOLID, FORCE)
 
-		-- Outline
-		lcd.drawRectangle(0, 0, 212, 64, SOLID)
-
 		lcd.drawNumber(98, 35, lapNumber, DBLSIZE)
 		lcd.drawNumber(135, 35, lapCount, DBLSIZE)
 		lcd.drawText(102, 42, 'of')
+
+		-- Outline
+		lcd.drawRectangle(0, 0, 212, 64, SOLID)
 	
 	else
 		lcd.drawText(55, 15, 'Waiting for', DBLSIZE)
@@ -359,6 +358,7 @@ local function timer_func(keyEvent)
 
 	if showTiming then
 		timerDraw()
+
 		laps_show(170, 3, 6)
 	end
 end
