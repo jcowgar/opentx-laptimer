@@ -10,8 +10,6 @@
 
 local THROTTLE_CHANNEL = 'ch1'
 local LAP_SWITCH = 'sh'
-local SHOW_SPLIT = true
-local SHOW_SPLIT_AVG = false
 local SPEAK_GOOD_BAD = true
 local SPEAK_MID = true
 
@@ -170,7 +168,7 @@ local function timerDraw()
 	local tickNow = getTime()
 	local tickDiff = tickNow - lapStartTicks
 	
-	lcd.drawText(5, 3, "" .. round(tickDiff / 100.0, 2), DBLSIZE)
+	lcd.drawNumber(65, 3, tickDiff, PREC2 + DBLSIZE)
 	
 	if SPEAK_MID and lapSpokeMid == false then
 		local lastIndex = #laps
@@ -221,7 +219,9 @@ local function lapsShow()
 	local thisLapTime = 0
 	
 	if isTiming then
-		lcd.drawText(90, 40, lapNumber .. ' of ' .. lapCount, DBLSIZE)
+		lcd.drawNumber(98, 35, lapNumber, DBLSIZE)
+		lcd.drawNumber(135, 35, lapCount, DBLSIZE)
+		lcd.drawText(102, 42, 'of')
 	else
 		lcd.drawText(55, 15, 'Waiting for', DBLSIZE)
 		lcd.drawText(55, 35, 'Race Start', DBLSIZE)
@@ -239,9 +239,9 @@ local function lapsShow()
 	for i = lc, lcEnd, -1 do
 		local lap = laps[i]
 		
-		lcd.drawText(170, ((lc - i) * 10) + 3,
+		lcd.drawText(150, ((lc - i) * 10) + 3,
 			string.format('%d', i) .. ': ' ..
-			string.format('%0.2f', lap[2] / 100.0))
+			string.format('%0.2f', lap[2] / 100.0) .. '/' .. '0')
 	end
 
 	local sum = 0
@@ -251,7 +251,7 @@ local function lapsShow()
 	
 	local avg = sum / lc
 	
-	lcd.drawText(5, 23, string.format('%0.2f', round(avg / 100.0, 2)) .. ' avg', DBLSIZE)
+	lcd.drawNumber(65, 35, avg, PREC2 + DBLSIZE)
 	
 	if isTiming and lc > 1 then
 		if SPEAK_GOOD_BAD and spokeGoodBad == false then
@@ -264,15 +264,8 @@ local function lapsShow()
 			end
 		end
 		
-		if SHOW_SPLIT then
-			local splitLast = round(thisLapTime - lastLapTime, 2) / 100.0
-			lcd.drawText(70, 3, string.format('%+0.2f', splitLast), DBLSIZE)
-		end
-
-		if SHOW_SPLIT_AVG then
-			local splitAvg = round(thisLapTime - avg, 2) / 100.0
-			lcd.drawText(70, 23, string.format('%+0.2f', splitAvg), DBLSIZE)
-		end
+		local splitLast = thisLapTime - lastLapTime
+		lcd.drawNumber(135, 3, splitLast, PREC2 + DBLSIZE)
 	end
 end
 
@@ -289,6 +282,24 @@ local function timer_func(keyEvent)
 	end
 
 	lcd.clear()
+
+	-- Column 1
+	lcd.drawFilledRectangle(0, 22, 70, 11, BLACK)	
+	lcd.drawText(30, 24, 'Cur', INVERS)
+
+	lcd.drawFilledRectangle(0, 53, 70, 11, BLACK)	
+	lcd.drawText(30, 55, 'Avg', INVERS)
+	
+	-- Column 2
+	
+	lcd.drawFilledRectangle(70, 22, 70, 11, BLACK)
+	lcd.drawText(90, 24, 'Split', INVERS)
+	
+	lcd.drawFilledRectangle(70, 53, 70, 11, BLACK)
+	lcd.drawText(100, 55, 'Lap', INVERS)
+	
+	lcd.drawLine(70, 0, 70, 63, SOLID, FORCE)
+	lcd.drawLine(140, 0, 140, 63, SOLID, FORCE)
 
 	--
 	-- Check to see if we should do anything with the lap switch
