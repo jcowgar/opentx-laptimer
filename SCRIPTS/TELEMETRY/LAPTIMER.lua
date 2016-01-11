@@ -12,6 +12,7 @@ local THROTTLE_CHANNEL = 'ch1'
 local LAP_SWITCH = 'sh'
 local SPEAK_GOOD_BAD = true
 local SPEAK_MID = true
+local SPEAK_LAP_NUMBER = true
 
 --
 -- User Configuration Done
@@ -335,6 +336,10 @@ local function timer_func(keyEvent)
 			local lapTicks = (getTime() - lapStartTicks)
 							
 			laps[lapNumber] = { lapStartDateTime, lapTicks }
+
+			if SPEAK_LAP_NUMBER then
+				playNumber(lapNumber, 0)
+			end		
 		end
 		
 		lapNumber = lapNumber + 1
