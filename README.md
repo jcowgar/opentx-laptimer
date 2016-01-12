@@ -7,6 +7,8 @@ lap data for analysis back at the computer.
 
 See https://www.youtube.com/watch?v=ZyI2gwdLWe0 for a quick demo of the Lap Timer.
 
+**NOTE**: OpenTX v2.1.x is required. Lap Timer does not work on OpenTX 2.0.x.
+
 Installation
 ------------
 
