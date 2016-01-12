@@ -13,10 +13,10 @@ local LAP_SWITCH = 'sh'
 local SPEAK_GOOD_BAD = true
 local SPEAK_MID = true
 local SPEAK_LAP_NUMBER = true
-local SOUND_GOOD_LAP = 'good.wav'
-local SOUND_BAD_LAP = 'bad.wav'
-local SOUND_RACE_SAVE = 'on.wav'
-local SOUND_RACE_DISCARD = 'reset.wav'
+local SOUND_GOOD_LAP = 'LAPTIME/better.wav'
+local SOUND_BAD_LAP = 'LAPTIME/worse.wav'
+local SOUND_RACE_SAVE = 'LAPTIME/rsaved.wav'
+local SOUND_RACE_DISCARD = 'LAPTIME/rdiscard.wav'
 
 --
 -- User Configuration Done
