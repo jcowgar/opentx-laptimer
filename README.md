@@ -94,3 +94,8 @@ your race will be lost.
 
 From the *Race Setup* page you can press *Menu* to access the *Configuration* page. There
 you can configure some basic *Lap Timer* settings that affect all races.
+
+Release History
+---------------
+
+* **Version 1.0.0 - Jan 12, 2016**: First public release, everything is new!
