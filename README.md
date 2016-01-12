@@ -14,8 +14,13 @@ Installation
 
 1. Copy `SCRIPTS/TELEMETRY/LAPTIMER.lua` to your SD card's `SCRIPTS/TELEMETRY`
    folder. Create the folder if it does not exist.
-2. Copy the folder `BMP/LAPTIMER` to your SD card's `BMP` folder. Create the
-   folder if it does not exist.
+2. Copy the folder `BMP/LAPTIME` to your SD card's `BMP` folder. Create the
+   folder if it does not exist. In the end you should have `BMP/LAPTIME/S_SWHAND.bmp`
+   for example.
+3. Copy the folder `SOUNDS/LAPTIME` to your SD card's `SOUNDS/<LANG>` folder. `<LANG>`
+   should be abbreviation of you configured language. For example, English is `en` thus
+   the correct sounds directory would be `SOUNDS/en`. In the end you should have
+   `SOUNDS/en/LAPTIME/better.wav` for example.
 3. For any model you wish to enable the lap timer on, from the Telemetry setup
    screen, add a new screen, choose *Script* as the Type, and `LAPTIMER.lua` for
    the script name.
@@ -23,34 +28,27 @@ Installation
 Configuration
 -------------
 
-At the top of the script, you can alter a few items to customize the script to
-your likings.
+When launching *Lap Timer* for the first time, you will be presented with a configuration
+screen. Here, you can change a few key settings:
 
-```
-local THROTTLE_CHANNEL = 'ch1'
-local LAP_SWITCH = 'sh'
-local SPEAK_GOOD_BAD = true
-local SPEAK_MID = true
-local SPEAK_LAP_NUMBER = true
-```
-
-* **THROTTLE_CHANNEL** - Output channel for your throttle. This is used to detect
+* **Throttle Channel** - Output channel for your throttle. This is used to detect
   when a race starts for the first time from the *Timer* page. The output channel
   is used instead of `Thr` stick values because the channel output may be overridden
   by Kill switches, for example. If the channel goes high, then your aircraft will
   take off.
-* **LAP_SWITCH** - Switch you wish to use to indicate a lap was just completed. It
+* **Lap Switch** - Switch you wish to use to indicate a lap was just completed. It
   is best to put this on a momentary 2 position switch. On the Taranis, *SH* is
   ideal.
-* **SPEAK_GOOD_BAD** - When `true`, your radio will say "Good" if the lap you just
-  completed is faster than your previous lap or "Bad" if slower.
-* **SPEAK_MID** - If true, a beep will occur when you reach the mid way point of the lap
-  as defined by half of your last laps time. For example, say your last lap was 60 seconds
-  exactly. If `SPEAK_MID` is true, at 30 seconds you will hear a long beep. If you are
-  further than 1/2 way around the course, then you are doing better than you did last lap.
-  If, however, you are not yet to the half way point, you are doing worse than you did
-  last lap.
-* **SPEAK_LAP_NUMBER** - When `true`, when a lap is completed, that number will be spoken.
+* **Speak Better/Worse** - If *Yes*, your radio will say "Better" if the lap you just
+  completed is faster than your previous lap or "Worse" if slower. You can alter these
+  sound files to your likings. They are located in the `SOUNDS/LAPTIME` directory and
+  are named `better.wav` and `worse.wav`.
+* **Speak Lap Number** - If *Yes*, when a lap is completed, that number will be spoken.
+* **Beep At Half Lap** - If *Yes*, a long beep will occur when you reach the mid way point
+  of the lap as defined by half of your last laps time. For example, say your last lap was
+  60 seconds exactly. At 30 seconds you will hear a long beep. If you are further than
+  1/2 way around the course, then you are doing better than you did last lap. If, however,
+  you are not yet to the half way point, you are doing worse than you did last lap.
 
 Usage
 -----
@@ -60,7 +58,7 @@ then display any Telemetry screens you have defined. If you have multiple
 screens, press the *Page* button until you are on the lap timer screen.
 
 When first entering the Lap Timer screen, you will be presented with the
-*Configuration* page. Here you set how many laps you wish to run. Press your
+*Race Setup* page. Here you set how many laps you wish to run. Press your
 *Plus* and *Minus* keys to adjust accordingly, then press *Enter* to accept
 the value and go to the *Timing* page.
 
@@ -90,6 +88,9 @@ From the *Timer* page you can press *Exit* to abort the race. For example, maybe
 you crashed on lap 2 of 5. This will take you to the *Post Race* page, where you
 will be able to save or discard the incomplete race.
 
-From the *Timer* page you can press *Menu* to access the *Configuration* page
+From the *Timer* page you can press *Menu* to access the *Race Setup* page
 and change any parameters accordingly. **NOTE**: If you do this during a race,
 your race will be lost.
+
+From the *Race Setup* page you can press *Menu* to access the *Configuration* page. There
+you can configure some basic *Lap Timer* settings that affect all races.
