@@ -12,6 +12,7 @@ local SOUND_GOOD_LAP = 'LAPTIME/better.wav'
 local SOUND_BAD_LAP = 'LAPTIME/worse.wav'
 local SOUND_RACE_SAVE = 'LAPTIME/rsaved.wav'
 local SOUND_RACE_DISCARD = 'LAPTIME/rdiscard.wav'
+local SOUND_LAP = 'LAPTIME/lap.wav'
 
 --
 -- User Configuration Done
@@ -451,6 +452,7 @@ end
 local function lapsSpeakProgress()
 	if #laps > 0 then
 		if ConfigSpeakLapNumber then
+			playFile(SOUND_LAP)
 			playNumber(lapNumber, 0)
 		end
 	end
