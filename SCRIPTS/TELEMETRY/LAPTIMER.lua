@@ -17,6 +17,7 @@ local SOUND_RACE_SAVE = 'LAPTIME/rsaved.wav'
 local SOUND_RACE_DISCARD = 'LAPTIME/rdiscard.wav'
 local SOUND_LAP = 'LAPTIME/lap.wav'
 local SOUND_LAPS = 'LAPTIME/laps.wav'
+local SOUND_LAST_LAP = 'LAPTIME/lastlap.wav'
 local SOUND_WAITING_RACE_START = 'LAPTIME/wrcstart.wav'
 local SOUND_RACE_OVER = 'LAPTIME/racedone.wav'
 
@@ -465,7 +466,7 @@ local function lapsSpeakProgress()
 	if #laps > 0 then
 		if ConfigSpeakLapNumber then
 			playFile(SOUND_LAP)
-			playNumber(lapNumber, 0)
+			playNumber(lapNumber, 0)			
 		end
 	end
 	
@@ -497,6 +498,10 @@ local function lapsSpeakProgress()
 				playFile(SOUND_LAP_WORSE)
 			end
 		end
+	end
+	
+	if lapNumber + 1 == lapCount then
+		playFile(SOUND_LAST_LAP)
 	end
 end
 
