@@ -16,6 +16,8 @@ local SOUND_LAP_MUCH_WORSE = 'LAPTIME/mworse.wav'
 local SOUND_RACE_SAVE = 'LAPTIME/rsaved.wav'
 local SOUND_RACE_DISCARD = 'LAPTIME/rdiscard.wav'
 local SOUND_LAP = 'LAPTIME/lap.wav'
+local SOUND_LAPS = 'LAPTIME/laps.wav'
+local SOUND_WAITING_RACE_START = 'LAPTIME/wrcstart.wav'
 
 local LAP_TIME_MUCH_MULTIPLIER = 0.15 -- 15% better/worse to trip the "much" language
 local LAP_TIME_SAME_MULTIPLIER = 0.02 -- 2% better/worse to trip the "same" language
@@ -71,6 +73,7 @@ local lapCount = 3
 local isTiming = false
 local lastLapSw = -2048
 local spokeBetterWorse = false
+local spokeWaitingForRaceStart = false
 
 local laps = {}
 local lapNumber = 0
@@ -346,18 +349,16 @@ local function race_setup_draw()
 		setup_did_initial_draw = true
 		
 		lcd.clear()
-	
-		lcd.drawScreenTitle('Configuration', 1, 1)
-	
-		lcd.drawPixmap(135, 11, '/BMP/LAPTIME/S_SWHAND.bmp')
-		lcd.drawPixmap(2, 14, '/BMP/LAPTIME/S_TITLE.bmp')
+
+		lcd.drawPixmap(135, 7, '/BMP/LAPTIME/S_SWHAND.bmp')
+		lcd.drawPixmap(2, 9, '/BMP/LAPTIME/S_TITLE.bmp')
 	end
 	
 	-- Clear the lap counter (if you go from 10 down to 9, for example, it displays as 90
-	lcd.drawText(63, 47, '     ', MIDSIZE)
+	lcd.drawText(63, 42, '     ', MIDSIZE)
 
-	lcd.drawText(6, 48, 'Lap Count:')
-	lcd.drawText(63, 48, ' ' .. lapCount .. ' ', INVERS)
+	lcd.drawText(6, 43, 'Lap Count:')
+	lcd.drawText(63, 43, ' ' .. lapCount .. ' ', INVERS)
 end
 
 local function race_setup_func(keyEvent)
@@ -404,6 +405,7 @@ local function timerStart()
 	lapStartDateTime = getDateTime()
 	lapSpokeMid = false
 	spokeBetterWorse = false
+	spokeWaitingForRaceStart = false
 end
 
 local function timerDraw()
@@ -557,6 +559,14 @@ local function timer_func(keyEvent)
 		lcd.drawRectangle(0, 0, 212, 64, SOLID)
 	
 	else
+		if ConfigSpeakLapNumber == true and spokeWaitingForRaceStart == false then
+			playFile(SOUND_WAITING_RACE_START)
+			playNumber(lapCount, 0)
+			playFile(SOUND_LAPS)
+			
+			spokeWaitingForRaceStart = true
+		end
+		
 		lcd.drawText(55, 15, 'Waiting for', DBLSIZE)
 		lcd.drawText(55, 35, 'Race Start', DBLSIZE)
 	end
