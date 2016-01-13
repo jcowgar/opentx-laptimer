@@ -56,9 +56,8 @@ local CSV_FILENAME = '/LAPTIME.csv'
 local ConfigThrottleChannelNumber = 1
 local ConfigThrottleChannel = 'ch1'
 local ConfigLapSwitch = 'sh'
-local ConfigSpeakBetterWorse = true
-local ConfigSpeakLapNumber = true
-local ConfigBeepOnMidLap = true
+local ConfigVoiceFeedback = true
+local ConfigToneFeedback = true
 
 --
 -- State Variables

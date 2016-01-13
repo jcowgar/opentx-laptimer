@@ -31,25 +31,32 @@ Configuration
 When launching *Lap Timer* for the first time, you will be presented with a configuration
 screen. Here, you can change a few key settings:
 
-* **Throttle Channel** - Output channel for your throttle. This is used to detect
+* **Throttle Channel** -- Output channel for your throttle. This is used to detect
   when a race starts for the first time from the *Timer* page. The output channel
   is used instead of `Thr` stick values because the channel output may be overridden
   by Kill switches, for example. If the channel goes high, then your aircraft will
   take off.
-* **Lap Switch** - Switch you wish to use to indicate a lap was just completed. It
+* **Lap Switch** -- Switch you wish to use to indicate a lap was just completed. It
   is best to put this on a momentary 2 position switch. On the Taranis, *SH* is
   ideal.
-* **Speak Better/Worse** - If *Yes*, when completing a lap your radio will say
-  "Much Better", "Better", "Same", "Worse" or "Much Worse" as compared to your last
-  completed lap. You can alter these sound files to your likings. They are located in
-  the `SOUNDS/LAPTIME` directory and are named `mbetter.wav`, `better.wav`, `same.wav`,
-  `worse.wav` and `mworse.wav`.
-* **Speak Lap Number** - If *Yes*, when a lap is completed, that number will be spoken.
-* **Beep At Half Lap** - If *Yes*, a long beep will occur when you reach the mid way point
-  of the lap as defined by half of your last laps time. For example, say your last lap was
-  60 seconds exactly. At 30 seconds you will hear a long beep. If you are further than
-  1/2 way around the course, then you are doing better than you did last lap. If, however,
-  you are not yet to the half way point, you are doing worse than you did last lap.
+* **Voice Feedback** -- If *Yes*, Lap Timer will communicate via voice during several
+  points during the race:
+    * Waiting on Race Start -- When Lap Timer is ready to go, it'll speak "Waiting for
+      Race Start."
+    * Lap Number -- When a lap is completed, the lap number will be spoken.
+    * Better/Worse -- When a lap is completed, Lap Timer will tell you if you did
+      much better, better, about the same, worse or much worse when compared to the
+      previously completed lap.
+    * Race Done -- When the race is finished by either all laps being completed or by
+      ending the race prematurely with the *Exit* button, "Race Done" will be spoken.
+* **Tone Feedback** -- If *Yes* and *Voice Feedback* is *No*, a beep of various tones
+  and lengths will for Waiting on Race Start, Race Started, Lap Completed and Race Done.
+  If *Yes*, regardless of *Voice Feedback* a long beep will occur when you reach the mid
+  way point of the lap as defined by half of your last laps time. For example, say your
+  last lap was 60 seconds exactly. At 30 seconds you will hear a long beep. If you are
+  further than 1/2 way around the course, then you are doing better than you did last
+  lap. If, however, you are not yet to the half way point, you are doing worse than you
+  did last lap.
 
 Usage
 -----
