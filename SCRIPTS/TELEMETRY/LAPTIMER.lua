@@ -8,11 +8,17 @@
 -- User Configuration
 --
 
-local SOUND_GOOD_LAP = 'LAPTIME/better.wav'
-local SOUND_BAD_LAP = 'LAPTIME/worse.wav'
+local SOUND_LAP_SAME = 'LAPTIME/same.wav'
+local SOUND_LAP_BETTER = 'LAPTIME/better.wav'
+local SOUND_LAP_MUCH_BETTER = 'LAPTIME/mbetter.wav'
+local SOUND_LAP_WORSE = 'LAPTIME/worse.wav'
+local SOUND_LAP_MUCH_WORSE = 'LAPTIME/mworse.wav'
 local SOUND_RACE_SAVE = 'LAPTIME/rsaved.wav'
 local SOUND_RACE_DISCARD = 'LAPTIME/rdiscard.wav'
 local SOUND_LAP = 'LAPTIME/lap.wav'
+
+local LAP_TIME_MUCH_MULTIPLIER = 0.15 -- 15% better/worse to trip the "much" language
+local LAP_TIME_SAME_MULTIPLIER = 0.02 -- 2% better/worse to trip the "same" language
 
 --
 -- User Configuration Done
@@ -46,7 +52,7 @@ local CSV_FILENAME = '/LAPTIME.csv'
 local ConfigThrottleChannelNumber = 1
 local ConfigThrottleChannel = 'ch1'
 local ConfigLapSwitch = 'sh'
-local ConfigSpeakGoodBad = true
+local ConfigSpeakBetterWorse = true
 local ConfigSpeakLapNumber = true
 local ConfigBeepOnMidLap = true
 
@@ -64,7 +70,7 @@ local lapCount = 3
 
 local isTiming = false
 local lastLapSw = -2048
-local spokeGoodBad = false
+local spokeBetterWorse = false
 
 local laps = {}
 local lapNumber = 0
@@ -146,7 +152,7 @@ local function config_read()
 	ConfigThrottleChannelNumber = tonumber(c[1])
 	ConfigThrottleChannel = 'ch' .. c[1]
 	ConfigLapSwitch = c[2]
-	ConfigSpeakGoodBad = (c[3] == 'true')
+	ConfigSpeakBetterWorse = (c[3] == 'true')
 	ConfigSpeakLapNumber = (c[4] == 'true')
 	ConfigBeepOnMidLap = (c[5] == 'true')
 	
@@ -157,7 +163,7 @@ local function config_write()
 	local f = io.open(CONFIG_FILENAME, 'w')
 	io.write(f, ConfigThrottleChannelNumber)
 	io.write(f, ',' .. ConfigLapSwitch)
-	io.write(f, ',' .. iif(ConfigSpeakGoodBad, 'true', 'false'))
+	io.write(f, ',' .. iif(ConfigSpeakBetterWorse, 'true', 'false'))
 	io.write(f, ',' .. iif(ConfigSpeakLapNumber, 'true', 'false'))
 	io.write(f, ',' .. iif(ConfigBeepOnMidLap, 'true', 'false'))
 	io.close(f)
@@ -172,7 +178,7 @@ local function config_cycle_editing_value(keyEvent)
 	elseif ConfigCurrentField == CONFIG_FIELD_ConfigLapSwitch then
 		value = ConfigLapSwitch
 	elseif ConfigCurrentField == CONFIG_FIELD_SPEAK_BETTER_WORSE then
-		value = iif(ConfigSpeakGoodBad, 'Yes', 'No')
+		value = iif(ConfigSpeakBetterWorse, 'Yes', 'No')
 	elseif ConfigCurrentField == CONFIG_FIELD_SPEAK_LAP then
 		value = iif(ConfigSpeakLapNumber, 'Yes', 'No')
 	elseif ConfigCurrentField == CONFIG_FIELD_BEEP_AT_HALF then
@@ -207,7 +213,7 @@ local function config_cycle_editing_value(keyEvent)
 	elseif ConfigCurrentField == CONFIG_FIELD_ConfigLapSwitch then
 		ConfigLapSwitch = value
 	elseif ConfigCurrentField == CONFIG_FIELD_SPEAK_BETTER_WORSE then
-		ConfigSpeakGoodBad = (value == 'Yes')
+		ConfigSpeakBetterWorse = (value == 'Yes')
 	elseif ConfigCurrentField == CONFIG_FIELD_SPEAK_LAP then
 		ConfigSpeakLapNumber = (value == 'Yes')
 	elseif ConfigCurrentField == CONFIG_FIELD_BEEP_AT_HALF then
@@ -268,7 +274,7 @@ local function configuration_func(keyEvent)
 			iif(ConfigEditing, INVERS+BLINK, INVERS), 0))
 
 	lcd.drawText(8, 32, 'Speak Better/Worse:')
-	lcd.drawText(lcd.getLastPos() + 2, 32, iif(ConfigSpeakGoodBad, 'Yes', 'No'),
+	lcd.drawText(lcd.getLastPos() + 2, 32, iif(ConfigSpeakBetterWorse, 'Yes', 'No'),
 		iif(ConfigCurrentField == CONFIG_FIELD_SPEAK_BETTER_WORSE,
 			iif(ConfigEditing, INVERS+BLINK, INVERS), 0))
 
@@ -397,7 +403,7 @@ local function timerStart()
 	lapStartTicks = getTime()
 	lapStartDateTime = getDateTime()
 	lapSpokeMid = false
-	spokeGoodBad = false
+	spokeBetterWorse = false
 end
 
 local function timerDraw()
@@ -461,13 +467,28 @@ local function lapsSpeakProgress()
 		local lastLapTime = laps[#laps - 1][2]
 		local thisLapTime = laps[#laps][2]
 
-		if ConfigSpeakGoodBad and spokeGoodBad == false then
-			spokeGoodBad = true
-
-			if thisLapTime < lastLapTime then
-				playFile(SOUND_GOOD_LAP)
-			else
-				playFile(SOUND_BAD_LAP)
+		if ConfigSpeakBetterWorse and spokeBetterWorse == false then
+			spokeBetterWorse = true
+			
+			local lastLapTimeMuch = lastLapTime * LAP_TIME_MUCH_MULTIPLIER
+			local lastLapTimeSame = lastLapTime * LAP_TIME_SAME_MULTIPLIER
+			
+			if thisLapTime <= lastLapTime - lastLapTimeMuch then
+				playFile(SOUND_LAP_MUCH_BETTER)
+			
+			elseif thisLapTime >= lastLapTime - lastLapTimeSame and
+				thisLapTime <= lastLapTime + lastLapTimeSame
+			then
+				playFile(SOUND_LAP_SAME)
+			
+			elseif thisLapTime < lastLapTime then
+				playFile(SOUND_LAP_BETTER)
+				
+			elseif thisLapTime >= lastLapTime + lastLapTimeMuch then
+				playFile(SOUND_LAP_MUCH_WORSE)
+			
+			elseif thisLapTime > lastLapTime then
+				playFile(SOUND_LAP_WORSE)
 			end
 		end
 	end

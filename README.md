@@ -39,10 +39,11 @@ screen. Here, you can change a few key settings:
 * **Lap Switch** - Switch you wish to use to indicate a lap was just completed. It
   is best to put this on a momentary 2 position switch. On the Taranis, *SH* is
   ideal.
-* **Speak Better/Worse** - If *Yes*, your radio will say "Better" if the lap you just
-  completed is faster than your previous lap or "Worse" if slower. You can alter these
-  sound files to your likings. They are located in the `SOUNDS/LAPTIME` directory and
-  are named `better.wav` and `worse.wav`.
+* **Speak Better/Worse** - If *Yes*, when completing a lap your radio will say
+  "Much Better", "Better", "Same", "Worse" or "Much Worse" as compared to your last
+  completed lap. You can alter these sound files to your likings. They are located in
+  the `SOUNDS/LAPTIME` directory and are named `mbetter.wav`, `better.wav`, `same.wav`,
+  `worse.wav` and `mworse.wav`.
 * **Speak Lap Number** - If *Yes*, when a lap is completed, that number will be spoken.
 * **Beep At Half Lap** - If *Yes*, a long beep will occur when you reach the mid way point
   of the lap as defined by half of your last laps time. For example, say your last lap was
