@@ -18,6 +18,7 @@ local SOUND_RACE_DISCARD = 'LAPTIME/rdiscard.wav'
 local SOUND_LAP = 'LAPTIME/lap.wav'
 local SOUND_LAPS = 'LAPTIME/laps.wav'
 local SOUND_WAITING_RACE_START = 'LAPTIME/wrcstart.wav'
+local SOUND_RACE_OVER = 'LAPTIME/racedone.wav'
 
 local LAP_TIME_MUCH_MULTIPLIER = 0.15 -- 15% better/worse to trip the "much" language
 local LAP_TIME_SAME_MULTIPLIER = 0.02 -- 2% better/worse to trip the "same" language
@@ -74,6 +75,7 @@ local isTiming = false
 local lastLapSw = -2048
 local spokeBetterWorse = false
 local spokeWaitingForRaceStart = false
+local spokeRaceDone = false
 
 local laps = {}
 local lapNumber = 0
@@ -376,6 +378,7 @@ local function race_setup_func(keyEvent)
 	elseif keyEvent == EVT_ENTER_BREAK then
 		currentScreen = SCREEN_TIMER
 		setup_did_initial_draw = false
+		spokeWaitingForRaceStart = false
 		return
 	end
 	
@@ -406,6 +409,7 @@ local function timerStart()
 	lapSpokeMid = false
 	spokeBetterWorse = false
 	spokeWaitingForRaceStart = false
+	spokeRaceDone = false
 end
 
 local function timerDraw()
@@ -641,6 +645,12 @@ local post_race_option = PR_SAVE
 
 local function post_race_func(keyEvent)
 	local stats = laps_compute_stats()
+	
+	if ConfigSpeakLapNumber == true and spokeRaceDone == false then
+		playFile(SOUND_RACE_OVER)
+		
+		spokeRaceDone = true
+	end
 
 	if keyEvent == EVT_MINUS_FIRST or keyEvent == EVT_MINUS_RPT or
 	   keyEvent == EVT_PLUS_FIRST or keyEvent == EVT_PLUS_RPT
