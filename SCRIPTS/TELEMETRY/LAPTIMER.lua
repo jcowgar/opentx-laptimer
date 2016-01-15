@@ -30,6 +30,9 @@ local LAP_TIME_SAME_MULTIPLIER = 0.02 -- 2% better/worse to trip the "same" lang
 -- Do not alter below unless you know what you're doing!
 --
 
+local cfg = dofile('/SCRIPTS/LIBRARY/config.lua')
+local frm = dofile('/SCRIPTS/LIBRARY/form.lua')
+
 --
 -- Constants
 --
@@ -48,17 +51,6 @@ local SWITCH_NAMES = { 'sa', 'sb', 'sc', 'sd', 'se', 'sf', 'sg', 'sh' }
 
 local CONFIG_FILENAME = '/LAPTIME.cfg'
 local CSV_FILENAME = '/LAPTIME.csv'
-
---
--- Configuration Variables
---
-
-local ConfigThrottleChannelNumber = 1
-local ConfigThrottleChannel = 'ch1'
-local ConfigLapSwitch = 'sh'
-local ConfigSpeakBetterWorse = true
-local ConfigSpeakLapNumber = true
-local ConfigBeepOnMidLap = true
 
 --
 -- State Variables
@@ -87,212 +79,60 @@ local lapSpokeMid = false
 
 -----------------------------------------------------------------------
 --
--- Helper Methods (Generic)
---
------------------------------------------------------------------------
-
-local function iif(cond, T, F)
-    if cond then return T else return F end
-end
-
------------------------------------------------------------------------
---
 -- Configuration
 --
 -----------------------------------------------------------------------
 
-local CONFIG_FIELD_THROTTLE = 1
-local CONFIG_FIELD_ConfigLapSwitch = 2
-local CONFIG_FIELD_SPEAK_BETTER_WORSE = 3
-local CONFIG_FIELD_SPEAK_LAP = 4
-local CONFIG_FIELD_BEEP_AT_HALF = 5
+local CONFIG_VERSION = 1
 
-local CONFIG_OPTIONS = {
-	{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
-	SWITCH_NAMES,
-	{ 'Yes', 'No' },
-	{ 'Yes', 'No' },
-	{ 'Yes', 'No' }
+local config = {
+	Version = -1,
+	ThrottleChannelNumber = 1,
+	ThrottleChannel = 'ch1',
+	LapSwitch = 8,
+	SpeakBetterWorse = true,
+	SpeakLapNumber = true,
+	BeepOnMidLap = true
 }
 
-local ConfigCurrentField = CONFIG_FIELD_THROTTLE
-local ConfigEditing = false
+local CONFIG_SAVE_BUTTON = -1
+
+local configForm = {
+	ValueColumn = 125,
+	{ frm.TYPE_INTEGER, 'Throttle Channel', 'ThrottleChannelNumber', 10, 11, 1, 16 },
+	{ frm.TYPE_LIST, 'Lap Switch', 'LapSwitch', 10, 21, SWITCH_NAMES },
+	{ frm.TYPE_YES_NO, 'Speak Better/Worse', 'SpeakBetterWorse', 10, 31 },
+	{ frm.TYPE_YES_NO, 'Speak Lap Number', 'SpeakLapNumber', 10, 41 },
+	{ frm.TYPE_YES_NO, 'Beep on Mid Lap', 'BeepOnMidLap', 10, 51 },
+	{ frm.TYPE_BUTTON, 'Save', CONFIG_SAVE_BUTTON, 180, 51 },
+}
 
 local function config_read()
-	--
-	-- OpenTX Lua throws an error if you attempt to open a file that does not exist:
-	--
-	-- f_open(/Users/jeremy/Documents/RC/Taranis-X9E-SD/LAPTIME.cfg) = INVALID_NAME
-	-- f_close(0x1439291e05400000) (FIL:0x114392828)
-	-- PANIC: unprotected error in call to Lua API ((null))
-	--
-	-- Thus, let's open it in append mode, which should create a blank file if it does
-	-- not yet exist.
-	--
-	
-	local f = io.open(CONFIG_FILENAME, 'a')
-	if f ~= nil then
-		io.close(f)
-	end
+	config = cfg.read(CONFIG_FILENAME, config)
 
-	f = io.open(CONFIG_FILENAME, 'r')
-	if f == nil then
-		-- defaults will be used
+	if config.Version == -1 then
 		return false
 	end
-	
-	local content = io.read(f, 1024)
-	io.close(f)
-	
-	if content == '' then
-		-- defaults will be used
-		return false
-	end
-	
-	local c = {}
-
-	for value in string.gmatch(content, '([^,]+)') do
-		c[#c + 1] = value
-	end
-	
-	ConfigThrottleChannelNumber = tonumber(c[1])
-	ConfigThrottleChannel = 'ch' .. c[1]
-	ConfigLapSwitch = c[2]
-	ConfigSpeakBetterWorse = (c[3] == 'true')
-	ConfigSpeakLapNumber = (c[4] == 'true')
-	ConfigBeepOnMidLap = (c[5] == 'true')
-	
-	return true
 end
 
 local function config_write()
-	local f = io.open(CONFIG_FILENAME, 'w')
-	io.write(f, ConfigThrottleChannelNumber)
-	io.write(f, ',' .. ConfigLapSwitch)
-	io.write(f, ',' .. iif(ConfigSpeakBetterWorse, 'true', 'false'))
-	io.write(f, ',' .. iif(ConfigSpeakLapNumber, 'true', 'false'))
-	io.write(f, ',' .. iif(ConfigBeepOnMidLap, 'true', 'false'))
-	io.close(f)
-end
-
-local function config_cycle_editing_value(keyEvent)
-	local values = CONFIG_OPTIONS[ConfigCurrentField]
-	local value
+	config.Version = CONFIG_VERSION
+	config.ThrottleChannel = 'ch' .. string.format('%d', config.ThrottleChannelNumber)
 	
-	if ConfigCurrentField == CONFIG_FIELD_THROTTLE then
-		value = ConfigThrottleChannelNumber
-	elseif ConfigCurrentField == CONFIG_FIELD_ConfigLapSwitch then
-		value = ConfigLapSwitch
-	elseif ConfigCurrentField == CONFIG_FIELD_SPEAK_BETTER_WORSE then
-		value = iif(ConfigSpeakBetterWorse, 'Yes', 'No')
-	elseif ConfigCurrentField == CONFIG_FIELD_SPEAK_LAP then
-		value = iif(ConfigSpeakLapNumber, 'Yes', 'No')
-	elseif ConfigCurrentField == CONFIG_FIELD_BEEP_AT_HALF then
-		value = iif(ConfigBeepOnMidLap, 'Yes', 'No')
-	end
-	
-	local idx = 1
-
-	for i = 1, #values do
-		if values[i] == value then
-			idx = i
-		end
-	end
-	
-	if keyEvent == EVT_MINUS_FIRST or keyEvent == EVT_MINUS_RPT then
-		idx = idx - 1
-	else
-		idx = idx + 1
-	end
-	
-	if idx < 1 then
-		idx = #values
-	elseif idx > #values then
-		idx = 1
-	end
-
-	value = values[idx]
-
-	if ConfigCurrentField == CONFIG_FIELD_THROTTLE then
-		ConfigThrottleChannelNumber = idx
-		ConfigThrottleChannel = 'ch' .. string.format('%d', idx)
-	elseif ConfigCurrentField == CONFIG_FIELD_ConfigLapSwitch then
-		ConfigLapSwitch = value
-	elseif ConfigCurrentField == CONFIG_FIELD_SPEAK_BETTER_WORSE then
-		ConfigSpeakBetterWorse = (value == 'Yes')
-	elseif ConfigCurrentField == CONFIG_FIELD_SPEAK_LAP then
-		ConfigSpeakLapNumber = (value == 'Yes')
-	elseif ConfigCurrentField == CONFIG_FIELD_BEEP_AT_HALF then
-		ConfigBeepOnMidLap = (value == 'Yes')
-	end
+	cfg.write(CONFIG_FILENAME, config)
 end
 
 local function configuration_func(keyEvent)
-	if keyEvent == EVT_ENTER_BREAK then
-		if ConfigEditing then
-			ConfigEditing = false
-		else
-			ConfigEditing = true
-		end
-	
-	elseif ConfigEditing and 
-		(
-			keyEvent == EVT_MINUS_FIRST or keyEvent == EVT_MINUS_RPT or
-			keyEvent == EVT_PLUS_FIRST or keyEvent == EVT_PLUS_RPT
-		)
-	then
-		config_cycle_editing_value(keyEvent)
-	
-	elseif keyEvent == EVT_MINUS_FIRST or keyEvent == EVT_MINUS_RPT then
-		ConfigCurrentField = ConfigCurrentField - 1
-		
-		if ConfigCurrentField < CONFIG_FIELD_THROTTLE then
-			ConfigCurrentField = CONFIG_FIELD_BEEP_AT_HALF
-		end
-
-	elseif keyEvent == EVT_PLUS_FIRST or keyEvent == EVT_PLUS_RPT then
-		ConfigCurrentField = ConfigCurrentField + 1
-		
-		if ConfigCurrentField > CONFIG_FIELD_BEEP_AT_HALF then
-			ConfigCurrentField = CONFIG_FIELD_THROTTLE
-		end
-	
-	elseif keyEvent == EVT_EXIT_BREAK then
-		config_write()
-		
-		currentScreen = SCREEN_RACE_SETUP
-
-		return
-	end
-	
 	lcd.clear()
-
 	lcd.drawScreenTitle('Configuration', 1, 1)
 	
-	lcd.drawText(23, 12, 'Throttle Channel:')
-	lcd.drawText(lcd.getLastPos() + 2, 12, ConfigThrottleChannelNumber, 
-		iif(ConfigCurrentField == CONFIG_FIELD_THROTTLE, 
-			iif(ConfigEditing, INVERS+BLINK, INVERS), 0))
-
-	lcd.drawText(58, 22, 'Lap Switch:')
-	lcd.drawText(lcd.getLastPos() + 2, 22, ConfigLapSwitch,
-		iif(ConfigCurrentField == CONFIG_FIELD_ConfigLapSwitch,
-			iif(ConfigEditing, INVERS+BLINK, INVERS), 0))
-
-	lcd.drawText(8, 32, 'Speak Better/Worse:')
-	lcd.drawText(lcd.getLastPos() + 2, 32, iif(ConfigSpeakBetterWorse, 'Yes', 'No'),
-		iif(ConfigCurrentField == CONFIG_FIELD_SPEAK_BETTER_WORSE,
-			iif(ConfigEditing, INVERS+BLINK, INVERS), 0))
-
-	lcd.drawText(24, 42, 'Speak Lap Number:')
-	lcd.drawText(lcd.getLastPos() + 2, 42, iif(ConfigSpeakLapNumber, 'Yes', 'No'),
-		iif(ConfigCurrentField == CONFIG_FIELD_SPEAK_LAP,
-			iif(ConfigEditing, INVERS+BLINK, INVERS), 0))
-
-	lcd.drawText(28, 52, 'Beep At Half Lap:')
-	lcd.drawText(lcd.getLastPos() + 2, 52, iif(ConfigBeepOnMidLap, 'Yes', 'No'),
-		iif(ConfigCurrentField == CONFIG_FIELD_BEEP_AT_HALF,
-			iif(ConfigEditing, INVERS+BLINK, INVERS), 0))
+	keyEvent = frm.execute(configForm, config, keyEvent)
+	
+	if keyEvent == CONFIG_SAVE_BUTTON then
+		config_write()
+		currentScreen = SCREEN_RACE_SETUP
+		return
+	end
 end
 
 -----------------------------------------------------------------------
@@ -419,7 +259,7 @@ local function timerDraw()
 	
 	lcd.drawNumber(65, 3, tickDiff, PREC2 + DBLSIZE)
 	
-	if ConfigBeepOnMidLap and lapSpokeMid == false then
+	if config.BeepOnMidLap and lapSpokeMid == false then
 		local lastIndex = #laps
 		
 		if lastIndex > 0 then
@@ -464,7 +304,7 @@ end
 
 local function lapsSpeakProgress()
 	if #laps > 0 then
-		if ConfigSpeakLapNumber then
+		if config.SpeakLapNumber then
 			playFile(SOUND_LAP)
 			playNumber(lapNumber, 0)			
 		end
@@ -474,7 +314,7 @@ local function lapsSpeakProgress()
 		local lastLapTime = laps[#laps - 1][2]
 		local thisLapTime = laps[#laps][2]
 
-		if ConfigSpeakBetterWorse and spokeBetterWorse == false then
+		if config.SpeakBetterWorse and spokeBetterWorse == false then
 			spokeBetterWorse = true
 			
 			local lastLapTimeMuch = lastLapTime * LAP_TIME_MUCH_MULTIPLIER
@@ -568,7 +408,7 @@ local function timer_func(keyEvent)
 		lcd.drawRectangle(0, 0, 212, 64, SOLID)
 	
 	else
-		if ConfigSpeakLapNumber == true and spokeWaitingForRaceStart == false then
+		if config.SpeakLapNumber == true and spokeWaitingForRaceStart == false then
 			playFile(SOUND_WAITING_RACE_START)
 			playNumber(lapCount, 0)
 			playFile(SOUND_LAPS)
@@ -585,7 +425,7 @@ local function timer_func(keyEvent)
 	-- Check to see if we should do anything with the lap switch
 	--
 	
-	local lapSwVal = getValue(ConfigLapSwitch)
+	local lapSwVal = getValue(SWITCH_NAMES[config.LapSwitch])
 	local lapSwChanged = (lastLapSw ~= lapSwVal)
 	
 	--
@@ -593,7 +433,7 @@ local function timer_func(keyEvent)
 	-- timer if our throttle goes high
 	--
 	
-	if isTiming == false and getValue(ConfigThrottleChannel) >= OFF_MS then
+	if isTiming == false and getValue(config.ThrottleChannel) >= OFF_MS then
 		lapSwChanged = true
 		lapSwVal = ON_MS
 	end
@@ -651,7 +491,7 @@ local post_race_option = PR_SAVE
 local function post_race_func(keyEvent)
 	local stats = laps_compute_stats()
 	
-	if ConfigSpeakLapNumber == true and spokeRaceDone == false then
+	if config.SpeakLapNumber == true and spokeRaceDone == false then
 		playFile(SOUND_RACE_OVER)
 		
 		spokeRaceDone = true
