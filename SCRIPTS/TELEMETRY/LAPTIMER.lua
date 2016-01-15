@@ -58,10 +58,6 @@ local CSV_FILENAME = '/LAPTIME.csv'
 
 local currentScreen = SCREEN_RACE_SETUP
 
--- Setup Related
-
-local lapCount = 3
-
 -- Timer Related
 
 local isTiming = false
@@ -92,7 +88,8 @@ local config = {
 	LapSwitch = 8,
 	SpeakBetterWorse = true,
 	SpeakLapNumber = true,
-	BeepOnMidLap = true
+	BeepOnMidLap = true,
+	LapCount = 3
 }
 
 local CONFIG_SAVE_BUTTON = -1
@@ -145,7 +142,7 @@ local function laps_compute_stats()
 	local stats = {}
 	local lc = #laps
 	
-	stats.raceLapCount = lapCount
+	stats.raceLapCount = config.LapCount
 	stats.lapCount = lc
 	stats.averageLap = 0.0
 	stats.totalTime = 0.0
@@ -185,49 +182,24 @@ end
 --
 -----------------------------------------------------------------------
 
-local setup_did_initial_draw = false
+local RACE_START_BUTTON = -1
 
-local function race_setup_draw()
-	if setup_did_initial_draw == false then
-		setup_did_initial_draw = true
-		
-		lcd.clear()
-
-		lcd.drawPixmap(135, 7, '/BMP/LAPTIME/S_SWHAND.bmp')
-		lcd.drawPixmap(2, 9, '/BMP/LAPTIME/S_TITLE.bmp')
-	end
-	
-	-- Clear the lap counter (if you go from 10 down to 9, for example, it displays as 90
-	lcd.drawText(63, 42, '     ', MIDSIZE)
-
-	lcd.drawText(6, 43, 'Lap Count:')
-	lcd.drawText(63, 43, ' ' .. lapCount .. ' ', INVERS)
-end
+local raceSetupForm = {
+	ValueColumn = 63,
+	{ frm.TYPE_PIXMAP, '/BMP/LAPTIME/S_SWHAND.bmp', nil, 135, 9 },
+	{ frm.TYPE_PIXMAP, '/BMP/LAPTIME/S_TITLE.bmp', nil, 2, 7 },
+	{ frm.TYPE_INTEGER, 'Lap Count', 'LapCount', 6, 39, 1, 99 },
+	{ frm.TYPE_BUTTON, 'Start', RACE_START_BUTTON, 6, 53 },
+}
 
 local function race_setup_func(keyEvent)
-	if keyEvent == EVT_PLUS_FIRST or keyEvent == EVT_PLUS_RPT then
-		lapCount = lapCount + 1
-
-	elseif keyEvent == EVT_MINUS_FIRST or keyEvent == EVT_MINUS_RPT then
-		lapCount = lapCount - 1
-
-	elseif keyEvent == EVT_MENU_BREAK then
-		currentScreen = SCREEN_CONFIGURATION
-		setup_did_initial_draw = false
-		return
-
-	elseif keyEvent == EVT_ENTER_BREAK then
+	lcd.clear()
+	
+	keyEvent = frm.execute(raceSetupForm, config, keyEvent)
+	
+	if keyEvent == RACE_START_BUTTON then
 		currentScreen = SCREEN_TIMER
-		setup_did_initial_draw = false
-		spokeWaitingForRaceStart = false
-		return
 	end
-	
-	if lapCount < 1 then
-		lapCount = 1
-	end
-	
-	race_setup_draw()
 end
 
 -----------------------------------------------------------------------
@@ -292,7 +264,7 @@ local function lapsSave()
 			string.format('%02d', dt.hour), ':',
 			string.format('%02d', dt.min), ':',
 			string.format('%02d', dt.sec), ',',
-			i, ',', lapCount, ',',
+			i, ',', config.LapCount, ',',
 			lap[2] / 100.0, ',',
 			0, -- Average throttle not yet tracked
 			"\r\n")
@@ -340,7 +312,7 @@ local function lapsSpeakProgress()
 		end
 	end
 	
-	if lapNumber + 1 == lapCount then
+	if lapNumber + 1 == config.LapCount then
 		playFile(SOUND_LAST_LAP)
 	end
 end
@@ -401,7 +373,7 @@ local function timer_func(keyEvent)
 		lcd.drawLine(140, 0, 140, 63, SOLID, FORCE)
 
 		lcd.drawNumber(98, 35, lapNumber, DBLSIZE)
-		lcd.drawNumber(135, 35, lapCount, DBLSIZE)
+		lcd.drawNumber(135, 35, config.LapCount, DBLSIZE)
 		lcd.drawText(102, 42, 'of')
 
 		-- Outline
@@ -410,7 +382,7 @@ local function timer_func(keyEvent)
 	else
 		if config.SpeakLapNumber == true and spokeWaitingForRaceStart == false then
 			playFile(SOUND_WAITING_RACE_START)
-			playNumber(lapCount, 0)
+			playNumber(config.LapCount, 0)
 			playFile(SOUND_LAPS)
 			
 			spokeWaitingForRaceStart = true
@@ -457,7 +429,7 @@ local function timer_func(keyEvent)
 		
 		lapNumber = lapNumber + 1
 		
-		if lapNumber > lapCount then
+		if lapNumber > config.LapCount then
 			timerReset()
 			
 			lapNumber = 0
