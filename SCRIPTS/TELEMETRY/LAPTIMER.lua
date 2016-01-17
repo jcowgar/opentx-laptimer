@@ -47,7 +47,7 @@ local SCREEN_CONFIGURATION = 2
 local SCREEN_TIMER = 3
 local SCREEN_POST_RACE = 4
 
-local SWITCH_NAMES = { 'sa', 'sb', 'sc', 'sd', 'se', 'sf', 'sg', 'sh' }
+local SWITCH_NAMES = {}
 
 local CONFIG_FILENAME = '/LAPTIME.cfg'
 local CSV_FILENAME = '/LAPTIME.csv'
@@ -416,7 +416,7 @@ local function timer_func(keyEvent)
 	-- Start a new lap
 	--
 	
-	if lapSwChanged and lapSwVal >= ON_MS then
+	if lapSwChanged and lapSwVal >= OFF_MS then
 		if isTiming then
 			--
 			-- We already have a lap going, save the timer data
@@ -526,6 +526,25 @@ end
 -----------------------------------------------------------------------
 
 local function init_func()
+	local ver, radio, maj, minor, rev = getVersion()
+	
+	if radio == 'taranisx9e' then
+		SWITCH_NAMES = { 'sa', 'sb', 'sc', 'sd', 'se', 'sf', 'sg', 'sh',
+			'si', 'sj', 'sk', 'sl', 'sm',  'sn', 'so', 'sp', 'sq', 'sr',
+			'ls1', 'ls2', 'ls3', 'ls4', 'ls5', 'ls6', 'ls7', 'ls8', 'ls9', 'ls10',
+			'ls11', 'ls12', 'ls13', 'ls14', 'ls15', 'ls16', 'ls17', 'ls18', 'ls19', 'ls20',
+			'ls21', 'ls22', 'ls23', 'ls24', 'ls25', 'ls26', 'ls27', 'ls28', 'ls29', 'ls30',
+			'ls31', 'ls32' }
+	else
+		SWITCH_NAMES = { 'sa', 'sb', 'sc', 'sd', 'se', 'sf', 'sg', 'sh',
+			'ls1', 'ls2', 'ls3', 'ls4', 'ls5', 'ls6', 'ls7', 'ls8', 'ls9', 'ls10',
+			'ls11', 'ls12', 'ls13', 'ls14', 'ls15', 'ls16', 'ls17', 'ls18', 'ls19', 'ls20',
+			'ls21', 'ls22', 'ls23', 'ls24', 'ls25', 'ls26', 'ls27', 'ls28', 'ls29', 'ls30',
+			'ls31', 'ls32' }
+	end
+
+	configForm[2][6] = SWITCH_NAMES
+
 	lcd.clear()
 	
 	if config_read() == false then
