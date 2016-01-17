@@ -199,6 +199,8 @@ local function race_setup_func(keyEvent)
 	
 	if keyEvent == RACE_START_BUTTON then
 		currentScreen = SCREEN_TIMER
+	elseif keyEvent == EVT_MENU_BREAK then
+		currentScreen = SCREEN_CONFIGURATION
 	end
 end
 
